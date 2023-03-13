@@ -2,40 +2,75 @@ import os
 import datetime
 import openai
 from flask import Flask, redirect, render_template, request, url_for
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+cred = credentials.Certificate("./gptstoryteller-firebase-adminsdk-bhz08-8514eb1c53.json")
+firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
-messages = []
+
+db = firestore.client()
+collection = db.collection('messages')
 
 class Message:
-    def __init__(self, sender, text):
+    def  __init__(self, sender, text, timestamp):
         self.sender = sender
         self.text = text
-        self.timestamp = datetime.datetime.now()
+        self.timestamp = timestamp
 
-@app.route("/", methods=("GET", "POST"))
-def index():
-    if request.method == "POST":
-        userStory = request.form["user_story"]
-        msgUser = Message("USER", userStory)
-        messages.append(msgUser)
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=generate_prompt(messages),
-            max_tokens=600,
-            temperature=0.8,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-        )
-        msgAI = Message("AI", response.choices[0].text)
-        messages.append(msgAI)
-        return redirect(url_for("index"))
-        #return redirect(url_for("index", result=response.choices[0].text))
+def toDict(messages):
+    dict = []
+    for m in messages:
+        dict.append(vars(m))
+    return dict
 
-    #result = request.args.get("result")
+def toMessages(dict):
+    messages = []
+    for d in dict:
+        m = Message(d["sender"], d["text"], d["timestamp"])
+        messages.append(m)
+    return messages
+
+@app.route('/messages/<uuid>', methods=['GET'])
+def getMessages(uuid):
+    doc = collection.document(uuid).get()
+    messages = []
+    if doc.exists:
+        messages = toMessages(doc.to_dict().get("messages"))
     return render_template("index.html", messages=messages)
 
+@app.route('/messages/<uuid>', methods=['POST'])
+def saveMessages(uuid):
+    userStory = request.form["user_story"]
+    msgUser = Message("USER", userStory, datetime.datetime.now())
+    doc = collection.document(uuid).get()
+    if doc.exists:
+        messages = toMessages(doc.to_dict().get("messages"))
+    else:
+        messages = []
+    messages.append(msgUser)
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=generate_prompt(messages),
+        max_tokens=600,
+        temperature=0.8,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+    msgAI = Message("AI", response.choices[0].text, datetime.datetime.now())
+    messages.append(msgAI)
+    if doc.exists:
+        collection.document(uuid).update({"messages" : toDict(messages)})
+    else:
+        collection.document(uuid).set({"messages" : toDict(messages)})
+    return render_template("index.html", messages=messages)
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
 
 def generate_prompt(messages):
     story = ""

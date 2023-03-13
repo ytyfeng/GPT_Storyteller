@@ -25,6 +25,14 @@ This is the GPT Storyteller web app. It uses the [Flask](https://flask.palletspr
    $ pip install -r requirements.txt
    ```
 
+   To set up Firebase for the FireStore DB used in the project:
+
+   ```bash
+   $ pip install firebase-admin
+   ```
+
+   Download your private key for the Firebase Admin SDK from [https://console.firebase.google.com/u/0/project/gptstoryteller/settings/serviceaccounts/adminsdk](https://console.firebase.google.com/project/gptstoryteller/settings/serviceaccounts/adminsdk). Move the private key to this project's directory. Make sure this line `cred = credentials.Certificate()` in [app.py](app.py) has the correct private key path. 
+
 6. Make a copy of the example environment variables file:
 
    ```bash
