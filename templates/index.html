@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GPT Storyteller</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+</head>
+<body>
+  <h3>GPT Storyteller</h3>
+  <div class="container">
+    <div class="chatbot-ui">
+        {% for message in messages %}
+        <div class="message-row">
+            <div class="message-wrapper">
+              <div class="user-icon">
+                {{ message.sender }}: 
+              </div>
+              <div class="message-text">{{ message.text }}</div>
+              <span class="timestamp">{{ message.timestamp }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <form action="" method="post" class="chatbot-form">
+        <div class="row">
+          <textarea type="text" name="user_story" placeholder="Type your part of the story here. It can be a sentence to get the story started." required></textarea>
+          <div style="float:right;">
+             <input type="submit" value="Submit">
+          </div>
+        </div>
+    </form>
+  </div>
+</body>
+</html>
