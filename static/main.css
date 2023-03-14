@@ -65,6 +65,16 @@ input[type="submit"] {
   text-align: center;
   cursor: pointer;
 }
+input[type="respun"] {
+  padding: 12px;
+  width: 100px;
+  color: #fff;
+  background-color: #8682ff;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+}
 .result {
   font-weight: bold;
   margin-top: 40px;

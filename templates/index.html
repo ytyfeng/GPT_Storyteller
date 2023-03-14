@@ -3,6 +3,8 @@
 <head>
   <title>GPT Storyteller</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
   <h3>GPT Storyteller</h3>
@@ -23,6 +25,9 @@
     <form action="" method="post" class="chatbot-form">
         <div class="row">
           <textarea type="text" name="user_story" placeholder="Type your part of the story here. It can be a sentence to get the story started." required></textarea>
+          <div style="float:left;">
+             <input type="respun" value="Re-spun" onclick="Storyteller.removeCookie();">
+          </div>
           <div style="float:right;">
              <input type="submit" value="Submit">
           </div>
@@ -60,7 +65,12 @@
           });
       },
       setCookie: function(uuid) {
-          document.cookie = "storyteller_id=" + uuid + "; SameSite=None; Secure";
+        document.cookie = "storyteller_id=" + uuid + ";max-age=60*60*24*30;SameSite=None;Secure";
+      },
+      removeCookie: function() {
+        document.cookie = "storyteller_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        M.toast({html: 'Re-spunned!', classes: 'rounded'});
+        location.reload();
       },
       getUUIDFromCookie: function() {
           const cookieValue = document.cookie.split("; ").find((row) => row.startsWith("storyteller_id="))?.split("=")[1];
