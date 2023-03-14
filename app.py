@@ -1,7 +1,7 @@
 import os
 import datetime
 import openai
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, make_response
 import firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -35,14 +35,20 @@ def toMessages(dict):
 
 @app.route('/messages/<uuid>', methods=['GET'])
 def getMessages(uuid):
-    doc = collection.document(uuid).get()
+    cookieUUID = request.cookies.get('storyteller_id')
+    if cookieUUID is None or cookieUUID == '':
+        cookieUUID = uuid
+    doc = collection.document(cookieUUID).get()
     messages = []
     if doc.exists:
         messages = toMessages(doc.to_dict().get("messages"))
-    return render_template("index.html", messages=messages)
+    resp = make_response(render_template("index.html", messages=messages))
+    resp.set_cookie('storyteller_id', cookieUUID, max_age=2592000)
+    return resp
 
 @app.route('/messages/<uuid>', methods=['POST'])
 def saveMessages(uuid):
+    uuid = request.cookies.get('storyteller_id')
     userStory = request.form["user_story"]
     msgUser = Message("USER", userStory, datetime.datetime.now())
     doc = collection.document(uuid).get()
@@ -68,6 +74,12 @@ def saveMessages(uuid):
         collection.document(uuid).set({"messages" : toDict(messages)})
     return render_template("index.html", messages=messages)
 
+@app.route('/removeCookie', methods=['GET'])
+def removeCookie():
+    resp = make_response(render_template("index.html"))
+    resp.set_cookie('storyteller_id', expires=1)
+    return resp
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
@@ -82,3 +94,6 @@ def generate_prompt(messages):
     Completion:""".format(
         story
     )
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)

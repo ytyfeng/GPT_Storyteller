@@ -11,10 +11,10 @@ window.Storyteller = {
             this.setCookie(this.uuid);
             console.log("set cookie with uuid: ", this.uuid);
         }
+        this.ready = true;
         if (!window.location.href.includes(this.uuid)) {
           window.location.replace(window.location.origin + "/messages/" + this.uuid);
         }
-        this.ready = true;
     },
     generateUUID: function() {
         var d = new Date().getTime();
@@ -28,12 +28,14 @@ window.Storyteller = {
         });
     },
     setCookie: function(uuid) {
-      document.cookie = "storyteller_id=" + uuid + ";max-age=60*60*24*30;SameSite=None;Secure";
+      document.cookie = "storyteller_id=" + uuid + ";max-age=60*60*24*30;SameSite=None;";
     },
     removeCookie: function() {
-      document.cookie = "storyteller_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      M.toast({html: 'Re-spunned!', classes: 'rounded'});
-      location.reload();
+        /* deprecating js way of handling cookie since it's unstable in flask app
+        document.cookie = "storyteller_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        // M.toast({html: 'Re-spunned!', classes: 'rounded'});
+        location.reload(); */
+        window.location.replace(window.location.origin + "/removeCookie");
     },
     getUUIDFromCookie: function() {
         const cookieValue = document.cookie.split("; ").find((row) => row.startsWith("storyteller_id="))?.split("=")[1];

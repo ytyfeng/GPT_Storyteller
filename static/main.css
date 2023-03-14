@@ -65,8 +65,10 @@ input[type="submit"] {
   text-align: center;
   cursor: pointer;
 }
-input[type="respun"] {
+button[type="respun"] {
   padding: 12px;
+  font-size: 16px;
+  line-height: 24px;
   width: 100px;
   color: #fff;
   background-color: #8682ff;
