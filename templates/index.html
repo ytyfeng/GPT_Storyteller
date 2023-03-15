@@ -3,8 +3,6 @@
 <head>
   <title>GPT Storyteller</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
-  <!--link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script-->
   <script src="{{ url_for('static', filename='storyteller.js') }}"></script>
 </head>
 <body>
@@ -28,14 +26,32 @@
           <textarea type="text" name="user_story" placeholder="Type your part of the story here. It can be a sentence to get the story started." required></textarea>
           <div class="row">
             <div style="float:left;">
-               <button type="respun" onclick="Storyteller.removeCookie();">Re-spun</button>
+               <button type="respin" onclick="Storyteller.removeCookie();">Re-spin</button>
             </div>
             <div style="float:right;">
-               <input type="submit" value="Submit">
+               <input id="submitBtn" type="submit" value="Submit" onclick="showLoading(15);">
             </div>
           </div>
         </div>
     </form>
   </div>
+  <div id="overlay">
+    <div class="loader"></div>
+  </div>
+  <script>
+    function showLoading(seconds) {
+      if (!document.getElementsByName("user_story")[0].value) {
+        return;
+      }
+      document.getElementById("overlay").style.display = "block";
+      setTimeout(
+        function() {
+          document.getElementById("overlay").style.display = "none";
+        }, seconds * 1000);
+    }
+    function hideLoading() {
+      document.getElementById("overlay").style.display = "none";
+    }
+  </script>
 </body>
 </html>

@@ -33,7 +33,6 @@ window.Storyteller = {
     removeCookie: function() {
         /* deprecating js way of handling cookie since it's unstable in flask app
         document.cookie = "storyteller_id=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        // M.toast({html: 'Re-spunned!', classes: 'rounded'});
         location.reload(); */
         window.location.replace(window.location.origin + "/removeCookie");
     },
