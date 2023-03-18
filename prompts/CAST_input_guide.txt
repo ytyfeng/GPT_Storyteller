@@ -1,0 +1,115 @@
+CAST is a very useful system, but it currently lacks a user-friendly interface that makes it easy to modify and understand the input to the system. So in the meantime, one must learn a bit of clingo syntax in order to make use of the system. Our goal in this guide is to make that learning process a bit easier.
+
+Required Files
+Our file formatter is set up to write the majority of relevent clingo rules for the user. But it expects certain input files to exist before it can format the clingo files. These files are:
+
+interests.txt and facets.txt
+These files will contain a list of interests or facets that characters may have. They are separated in this way so that the user can later specify constraints on these two categories of attributes separately.
+
+For example, interests.txt may look like this:
+soccer
+knitting
+
+And facets.txt might look like this:
+gregariousness
+self_consciousness
+
+affinity_rules.lp
+This file will contain rules for how trait/interest levels should affect the level of affinity between two characters. These will vary depending on what the story writer imagines defines the relationships between their characters, but are formatted in the same way:
+
+attribute_affintity(attribute, level, attribute, level, modification).
+here, attribute can be either a facet or an interest. level can be either low, neutral, or high. modification can be a number, positive or negative, by which the affinity value for a relationship with these features should be modified.
+
+For example: let's say we are creating a cast where characters have a level of assertiveness as part of their attributes. Let us consider two people who are both highly assertive. We might image that two such people are likely to clash, and therefore not be particularly drawn to one another. So, we can make a rule to reflect this, and reduce the affinity between these two:
+
+attribute_affintity(assertiveness, high, assertivenss, high, -3).
+Another example: let's say we have a person who is very vulnerable, and a person who is very tender-minded. Perhaps in our world, tender-minded individuals are much better listeners than other people, and vulnerable people tend to also like to vent about their problems. Thus, we may make a rule to show that a vulnerable person is drawn to a tender-minded individual:
+
+attribute_affintity(vulnerable, high, tender_minded, high, 2).
+note that a rule like this is not symmetric. The tender minded person is not necessarily drawn towards the vulnerable person, unless we make another rule to show that it applies in that direction as well.
+
+instance.lp
+The actual details about the characters the user wishes to generate will go in this file. At minimum, the user must specify characters. They can do this either by specifying the characters individually, by name, or by the numerical placeholders showing the number of characters they desire. For example:
+
+character(kirsten).
+character(erica).
+character(1..6).
+the above clingo code would generate two characters, "kirsten" and "erica", as well as six other characters labeled by the integer values 1 through 6.
+
+Other constraints the user wishes to apply to their cast will also be specified in this file. There are a lot of options for what kinds of rules the user may specify, and these are describe further below.
+
+Optional Constraints
+Specific to one character
+Level of facet/interest
+Each character will have a level assigned to them for each attribute that is specified in the facet and interest files. Values range from 1 to 10.
+If the user has a specific value in mind, they can specify that value here. For example:
+
+level(warmth, erica, 9).
+The above rule can be read as "erica has a warmth level of 9 (out of 10).
+
+Between two characters
+Similarity of a specific attribute
+Based on the difference (d) between levels of facet or interest values: . Similarity can be considered either high(), neutral(), or low(). For example:
+
+sim(warmth,erica,kirsten,high).
+The above statement reads "erica and kirsten are highly similar in regards to warmth". In other words, their levels of warmth will differ by less than 2.
+
+Similarity between interests, similarity between facets
+This is based on the similarity of facets and interests individually. Each trait's similarity is given a value (high(+1), neutral(0), low(-1)) and summed to find the total similarity for that category. The maximum value it can take is the number of traits in that category. For example:
+
+pair_facet_similarity(erica, kirsten, 4).
+Let's say there are 6 total facets. The above clingo statement would then mean "erica and kirsten are similar in most aspect of their personality". Another example:
+
+pair_interest_similarity(erica, kirsten, -2).
+Let's say there are 3 total interests. Then the above statement would mean "erica and kirsten have very different interests".
+
+Overall similarity
+This rule works similarly to the above rules, but accounts for both interests and facets simultaneously.
+
+pair_similarity(erica, kirsten, 2).
+Affinity
+Affinity is based on similarity, but is adjusted by affinity rules. Like similarity, desired affinity between characters can also be specified as a constraint to the system. For example:
+
+pair_affinity(erica, kirsten, 2).
+The above statement would read "erica is slightly drawn to kirsten"
+
+Note that unlike similarity, affinity is not symmetrical. The above statement does not set any restrictions on the degree to which kirsten is drawn to erica. While the above statement is in the system, the following might still be possible (depending on affinity rules):
+
+pair_affinity(kirsten, erica, -2).
+where the above might mean "kirsten is slightly repulsed by erica".
+
+Accross multiple characters
+Levels of attributes
+Let's say you know you want a certain number of people in your cast to have a specific trait, but you don't care exactly which characters are the ones to have this trait. You can use a more generic statement to specify the number of characters who will have or like a certain attribute, and to what degree. We do this with the following syntax:
+
+[min/max/match]_n_attribute_level_[min/max/match](number, attribute, level).
+There's a lot going on in the above syntax, so let's look at a couple examples:
+
+min_n_attribute_level_min(3, guitar, 7).
+The above statement would read "at least three characters must like to play guitar with a level of at least seven".
+
+Another example: let's say in or cast, we will consider anyone with an extroversion level of 4 or less to be "shy". Perhaps we want to have three shy characters in our cast, but we don't care exactly which characters are shy, or exactly how shy they are, just that they are classified as "shy". We can achieve this with the following clingo constraint:
+
+match_n_attribute_level_max(3, extroversion, 4).
+The above statement will read "there will be exactly three characters with an extroversion level of no more than 4".
+
+Similarity across all characters
+We can add constraints to the desired similarity between characters. We do this in the following way:
+
+[min/max/match]_n_[min/max/match]_sim(number, similarity).
+Let's look at a couple examples:
+
+match_n_max_sim(3, 4).
+The above statement reads "there are exactly three pairs of characters who have a pair similarity value of at most four". All other character pairs must thus have a pair similarity value greater than four.
+
+min_n_min_sim(2, 9).
+The above statement reads " there are at least two pairs of characters that have a pair similarity value of at least 9". This might be used to ensure there are at least two "best friends" in a cast.
+
+Similarity between one character and all others
+This rule is similar to above, but relative to one character.
+
+char_x_[min/max/match]_n_[min/max/match]_sim(character, number, similarity).
+For example:
+
+char_x_min_n_max_sim(kirsten, 2, 1).
+The above would be read as "at least three characters will be dissimilar from kirsten with a similarity level of no more than one". One may wish to use this rule to make a main character have a certain number of enemies/allies.

@@ -1,0 +1,10 @@
+attribute_affinity(ego_and_pride, high, ego_and_pride, high, -10).
+attribute_affinity(resourcefulness, high, resourcefulness, low, 10).
+attribute_affinity(scrupulousness, high, scrupulousness, low, -5).
+attribute_affinity(ego_and_pride, high, ego_and_pride, low, -2).
+attribute_affinity(meth, high, meth, low, -10).
+attribute_affinity(meth, low, meth, high, -20).
+attribute_affinity(meth, high, meth, high, 2).
+attribute_affinity(money, high, money, high, -10).
+attribute_affinity(money, high, money, low, 2).
+attribute_affinity(chemistry, high, chemistry, low, -2).
