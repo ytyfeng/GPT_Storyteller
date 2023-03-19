@@ -19,21 +19,14 @@
               <span class="timestamp">{{ message.timestamp }}</span>
             </div>
         </div>
-        {% if loop.length == 2 %}
-            <div class="message-text">You can find the GPT generated CAST input files here, 
-              <a href="{{ href }}">{{ href }}</a>
-            </div>
-        {% endif%}
         {% endfor %}
-
     </div>
     <div class="jumbotron">
         {% block body %}{% endblock %}
-        <div style="float:left;margin-top:-45px;position:absolute;">
-          <button type="respin" onclick="Storyteller.removeCookie();">Re-spin</button>
-        </div>
     </div>
-
+    <div style="margin-top:30px;">
+      <button type="respin" onclick="Storyteller.removeCookie();">Re-spin</button>
+    </div>
     
   </div>
   <div id="overlay">

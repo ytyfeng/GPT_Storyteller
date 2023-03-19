@@ -52,7 +52,7 @@ def getMessages(uuid):
     messages = []
     if doc.exists:
         messages = toMessages(doc.to_dict().get("messages"))
-        resp = make_response(render_template("index.html", messages=messages))
+        resp = make_response(render_template("index.html", messages=messages, cast_href="/cast/" + uuid))
     else:
         resp = make_response(render_template("background_input.html", messages=messages))
     resp.set_cookie('storyteller_id', cookieUUID, max_age=2592000)
@@ -73,9 +73,11 @@ def saveMessages(uuid):
     for m in messages:
         background += m.text + "\n"
     char_desc, _ = Storyteller().get_characters_desc(background)
-    background += char_desc
-    msgAI = Message("AI", "Here are the character descriptions. \n" + char_desc + "\nPlease allow me 3-5 minutes to generate the CAST rules based on these descriptions.", datetime.datetime.now())
+    background += str(char_desc)
+    msgAI = Message("AI", "Here are the character descriptions: \n" + str(char_desc), datetime.datetime.now())
     messages.append(msgAI)
+    msgAI2 = Message("AI", "Please allow me 3-5 minutes to generate the CAST rules based on these descriptions. After 3-5 minutes, you will find the GPT generated CAST input files here, <a href='{}'>{}</a>".format("/cast/" + uuid, "/cast/" + uuid), datetime.datetime.now())
+    messages.append(msgAI2)
     if doc.exists:
         collection.document(uuid).update({"messages" : toDict(messages)})
     else:
@@ -83,7 +85,7 @@ def saveMessages(uuid):
 
     thread = Thread(target=createCASTInputs, args=[background, uuid])
     thread.start()
-    return render_template("index.html", messages=messages, href="/cast/" + uuid)
+    return render_template("index.html", messages=messages, cast_href="/cast/" + uuid)
 
     
 def readCASTInputFiles(uuid):
