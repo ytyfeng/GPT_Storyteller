@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+
+{% block body %}
+
+<form action="" method="post" class="chatbot-form">
+    <div class="row">
+        <textarea type="text" name="user_story" placeholder="Write the background of your story here. You can create some rough sketches of the plot and characters. AI will then elaborate and generate your story." required></textarea>
+        <div style="float:right;">
+            <input id="submitBtn" type="submit" value="Submit" onclick="showLoading(15);">
+        </div>
+    </div>
+</form>
+
+{% endblock %}

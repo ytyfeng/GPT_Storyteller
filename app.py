@@ -1,6 +1,7 @@
 import os
 import datetime
 import openai
+from threading import Thread
 from flask import Flask, redirect, render_template, request, url_for, make_response
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -51,7 +52,9 @@ def getMessages(uuid):
     messages = []
     if doc.exists:
         messages = toMessages(doc.to_dict().get("messages"))
-    resp = make_response(render_template("index.html", messages=messages))
+        resp = make_response(render_template("index.html", messages=messages))
+    else:
+        resp = make_response(render_template("background_input.html", messages=messages))
     resp.set_cookie('storyteller_id', cookieUUID, max_age=2592000)
     return resp
 
@@ -66,22 +69,63 @@ def saveMessages(uuid):
     else:
         messages = []
     messages.append(msgUser)
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=generate_prompt(messages),
-        max_tokens=600,
-        temperature=0.8,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0,
-    )
-    msgAI = Message("AI", response.choices[0].text, datetime.datetime.now())
+    background = ""
+    for m in messages:
+        background += m.text + "\n"
+    char_desc, _ = Storyteller().get_characters_desc(background)
+    background += char_desc
+    msgAI = Message("AI", "Here are the character descriptions. \n" + char_desc + "\nPlease allow me 3-5 minutes to generate the CAST rules based on these descriptions.", datetime.datetime.now())
     messages.append(msgAI)
     if doc.exists:
         collection.document(uuid).update({"messages" : toDict(messages)})
     else:
         collection.document(uuid).set({"messages" : toDict(messages)})
-    return render_template("index.html", messages=messages)
+
+    thread = Thread(target=createCASTInputs, args=[background, uuid])
+    thread.start()
+    return render_template("index.html", messages=messages, href="/cast/" + uuid)
+
+    
+def readCASTInputFiles(uuid):
+    castDir = os.path.join(app.config['CAST_FOLDER'], "inputs/" + uuid)
+    if os.path.exists(castDir):
+        with open(castDir + "/interests.txt", "r") as f:
+            interests = f.read()
+        with open(castDir + "/facets.txt", "r") as f:
+            facets = f.read()
+        with open(castDir + "/instance.lp", "r") as f:
+            instance = f.read()
+        with open(castDir + "/affinity_rules.lp", "r") as f:
+            affinity = f.read()
+        return interests, facets, instance, affinity
+    else:
+        return None, None, None, None
+
+@app.route('/cast/<uuid>', methods=['GET'])
+def renderCASTEditor(uuid):
+    interests, facets, instance, affinity = readCASTInputFiles(uuid)
+    return render_template("cast.html", interests=interests, facets=facets, instance=instance, affinity=affinity)
+
+@app.route('/cast/<uuid>', methods=['POST'])
+def saveCASTEdits(uuid):
+    castDir = os.path.join(app.config['CAST_FOLDER'], "inputs/" + uuid)
+    uuid = request.cookies.get('storyteller_id')
+    interests = request.form["interests.txt"]
+    facets = request.form["facets.txt"]
+    instance = request.form["instance.lp"]
+    affinity = request.form["affinity_rules.lp"]
+    with open(castDir + "/interests.txt", "w") as f:
+        f.write(interests)
+    with open(castDir + "/facets.txt", "w") as f:
+        f.write(facets)
+    with open(castDir + "/instance.lp", "w") as f:
+        f.write(instance)
+    with open(castDir + "/affinity_rules.lp", "w") as f:
+        f.write(affinity)
+
+    return render_template("index.html")
+    # TODO: run CAST, then GPT, then render story
+    # getCASToutputs(uuid)
 
 @app.route('/removeCookie', methods=['GET'])
 def removeCookie():
@@ -141,6 +185,7 @@ def createCASTInputs(background, uuid):
     affinityByFacets = Storyteller().get_response(None, messages, 1600)
     with open(outputDir + "/affinity_rules.lp", "w") as f:
         f.write(affinityByInterests + "\n" + affinityByFacets)
+    return interests, facets, instance, affinityByInterests + "\n" + affinityByFacets
     #messages.append({"role": "assistant", "content": affinityByFacets})
     #messages.append({"role": "user", "content": userPrompt4})
     #messages.append({"role": "assistant", "content": affinityByInterests})

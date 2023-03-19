@@ -19,21 +19,22 @@
               <span class="timestamp">{{ message.timestamp }}</span>
             </div>
         </div>
+        {% if loop.length == 2 %}
+            <div class="message-text">You can find the GPT generated CAST input files here, 
+              <a href="{{ href }}">{{ href }}</a>
+            </div>
+        {% endif%}
         {% endfor %}
+
     </div>
-    <form action="" method="post" class="chatbot-form">
-        <div class="row">
-          <textarea type="text" name="user_story" placeholder="Type your part of the story here. It can be a sentence to get the story started." required></textarea>
-          <div class="row">
-            <div style="float:left;">
-               <button type="respin" onclick="Storyteller.removeCookie();">Re-spin</button>
-            </div>
-            <div style="float:right;">
-               <input id="submitBtn" type="submit" value="Submit" onclick="showLoading(15);">
-            </div>
-          </div>
+    <div class="jumbotron">
+        {% block body %}{% endblock %}
+        <div style="float:left;margin-top:-45px;position:absolute;">
+          <button type="respin" onclick="Storyteller.removeCookie();">Re-spin</button>
         </div>
-    </form>
+    </div>
+
+    
   </div>
   <div id="overlay">
     <div class="loader"></div>
