@@ -124,10 +124,18 @@ def saveCASTEdits(uuid):
         f.write(instance)
     with open(castDir + "/affinity_rules.lp", "w") as f:
         f.write(affinity)
+    
+    # run CAST, then GPT, then render story
+    getCASToutputs(uuid)
+    doc = collection.document(uuid).get()
+    messages = toMessages(doc.to_dict().get("messages"))
+    background = messages[0].text
+    story = Storyteller().generate_story_cast(background, uuid)
+    msgAI = Message("AI", story, datetime.datetime.now())
+    messages = []
+    messages.append(msgAI)
 
-    return render_template("index.html")
-    # TODO: run CAST, then GPT, then render story
-    # getCASToutputs(uuid)
+    return render_template("index.html", messages=messages)
 
 @app.route('/removeCookie', methods=['GET'])
 def removeCookie():

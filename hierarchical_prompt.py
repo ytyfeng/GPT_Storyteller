@@ -8,10 +8,10 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class Storyteller:
 
-    def get_response(self, prompt, messages=None, max_tokens=600):
+    def get_response(self, prompt, messages=None, max_tokens=600, model="gpt-4"):
         if messages is not None:
             response = openai.ChatCompletion.create(
-                model="gpt-4",
+                model=model,
                 messages=messages,
                 max_tokens=max_tokens,
                 temperature=0.8,
@@ -21,7 +21,7 @@ class Storyteller:
             )
         else:
             response = openai.ChatCompletion.create(
-                    model="gpt-4",
+                    model=model,
                     messages=[
                         {"role": "user", "content": prompt}
                     ],
@@ -72,22 +72,34 @@ class Storyteller:
         prompt = prompt + background + ' '
         for loc_name in loc_names:
             prompt_loc = prompt + "<place>" + loc_name + "</place> " + "Description: "
-            desc = self.get_response(prompt_loc)
+            desc = self.get_response(prompt_loc, model="gpt-3.5-turbo")
             loc_desc.update({loc_name: desc})
+
+        with open("example_stories/loc_desc.txt", "w") as f:
+            f.write(str(loc_desc))
         
         return loc_desc
 
 
-    def get_stories(self, outlines, background, char_desc, loc_desc):
+    def get_stories(self, outlines, background, all_char_desc, loc_desc):
+        previous_beats = ""
         stories = ""
-        print("Summary: " + background)
-        print("Characters Description: " + str(char_desc))
+        char_desc_text = " ".join(all_char_desc)
+        prompt = "Based on the Background, Characters Descriptions, Place Description, Plot Element, Previous Beats, elaborate the Beat into one story paragraph. \n"
+        prompt += "Background: " + background + "\n"
+        prompt += "Characters Description: " + char_desc_text + "\n"
         for outline in outlines:
-            print("Place: " + outline[0])
-            print("Place Description: " + loc_desc[outline[0]])
-            print("Plot Element: " + outline[1])
-            print("Beat: " + outline[2])
-        
+            prompt_i = prompt
+            prompt_i += "Place Description: " + loc_desc[outline[0]] + "\n"
+            prompt_i += "Plot Element: " + outline[1] + "\n"
+            prompt_i += "Previous Beats: " + previous_beats + "\n"
+            prompt_i += "Beat: " + outline[2] + "\n"
+            prompt_i += "Elaborated Story: "
+            previous_beats += outline[2] + "\n"
+            story = self.get_response(prompt_i, model="gpt-3.5-turbo")
+            stories += story + "\n"
+        with open("example_stories/story.txt", "w") as f:
+            f.write(stories)
         return stories
 
     def generate_story(self, background):
@@ -109,13 +121,13 @@ class Storyteller:
 
     # zero-short hierarchical prompt
     def get_char_desc_zero_shot(self, background, uuid, use_cast=True):
-        prompt = "based on the Background and Character Relations, generate a list of characters with descriptions about their roles in the story. Consider what they might do and the goals they might have based on their relations. Each character has its name wrapped in <character>[name]</character>, and its description in <description>[character description]</description>: \nBackground: "
+        prompt = "Based on the Background, generate a list of characters with descriptions about their roles in the story. Consider what they might do and the goals they might have based on the Character relations. Each character has its name wrapped in <character>[name]</character>, and its description in <description>[character description]</description>: \nBackground: "
         prompt += background
         if use_cast:
             with open(os.path.join("cast/", "outputs/" + uuid + '/parsed_output.txt'), "r") as f:
                 cast_relations = f.read()
             prompt += "Character Relations: " + cast_relations
-        char_desc = self.get_response(prompt)
+        char_desc = self.get_response(prompt, max_tokens=800)
         characters = re.findall("<character>(.*?)</character>", char_desc, re.DOTALL)
         descriptions = re.findall("<description>(.*?)</description>", char_desc, re.DOTALL)
         char_desc = {}
@@ -127,7 +139,7 @@ class Storyteller:
 
     def get_outline_zero_shot(self, background, all_char_desc, uuid, use_cast=True):
         char_desc_text = " ".join(all_char_desc)
-        prompt = "Based on Background, Character Descriptions, and Character Relations. Fill the [location name] and [beat] with location names and story beats in each plot element. \n"
+        prompt = "Based on Background, Character Descriptions, and Character Relations. Fill the [location name] with location names and [beat] with a 2-4 sentences story beats in each plot element. \n"
         prompt += "Background: " + background + "\n"
         prompt += "Character Descriptions: " + char_desc_text + "\n"
         if use_cast:
@@ -150,8 +162,17 @@ class Storyteller:
             f.write(str(outlines))
         return outlines, loc_names
 
-    def get_location_desc_zero_shot():
-        pass
+    def generate_story_cast(self, background, uuid):
+        print("Modifying character descriptions...")
+        char_desc_dict, all_desc = self.get_char_desc_zero_shot(background, uuid)
+        print("Generating story outlines...")
+        outlines, loc_names = self.get_outline_zero_shot(background, all_desc, uuid)
+        print("Generating location descriptions...")
+        loc_desc = self.get_location_desc(loc_names, background)
+        print("Writing the whole story...")
+        stories = self.get_stories(outlines, background, char_desc_dict, loc_desc)
+        return stories
+
     
 
 if __name__ == "__main__":
