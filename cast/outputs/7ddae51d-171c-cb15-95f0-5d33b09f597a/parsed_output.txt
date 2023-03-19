@@ -1,0 +1,100 @@
+walter_blue has high similarity with jesse_redman
+walter_blue has high affinity with jesse_redman
+walter_blue has low similarity with skyler_blue
+walter_blue has low affinity with skyler_blue
+walter_blue has low similarity with hank_schrader
+walter_blue has very low affinity with hank_schrader
+walter_blue has low similarity with gustavo_fring
+walter_blue has low affinity with gustavo_fring
+walter_blue has low similarity with saul_goodman
+walter_blue has low affinity with saul_goodman
+jesse_redman has high similarity with walter_blue
+jesse_redman has high affinity with walter_blue
+jesse_redman has low similarity with skyler_blue
+jesse_redman has low affinity with skyler_blue
+jesse_redman has high similarity with hank_schrader
+jesse_redman has high similarity with gustavo_fring
+jesse_redman has high affinity with gustavo_fring
+jesse_redman has high similarity with saul_goodman
+jesse_redman has high affinity with saul_goodman
+skyler_blue has low similarity with walter_blue
+skyler_blue has low affinity with walter_blue
+skyler_blue has low similarity with jesse_redman
+skyler_blue has low affinity with jesse_redman
+skyler_blue has high similarity with hank_schrader
+skyler_blue has high affinity with hank_schrader
+skyler_blue has low similarity with gustavo_fring
+skyler_blue has very low affinity with gustavo_fring
+skyler_blue has high similarity with saul_goodman
+hank_schrader has low similarity with walter_blue
+hank_schrader has very low affinity with walter_blue
+hank_schrader has high similarity with jesse_redman
+hank_schrader has high similarity with skyler_blue
+hank_schrader has high affinity with skyler_blue
+hank_schrader has low similarity with gustavo_fring
+hank_schrader has low affinity with gustavo_fring
+hank_schrader has high similarity with saul_goodman
+hank_schrader has high affinity with saul_goodman
+gustavo_fring has low similarity with walter_blue
+gustavo_fring has low affinity with walter_blue
+gustavo_fring has high similarity with jesse_redman
+gustavo_fring has high affinity with jesse_redman
+gustavo_fring has low similarity with skyler_blue
+gustavo_fring has very low affinity with skyler_blue
+gustavo_fring has low similarity with hank_schrader
+gustavo_fring has low affinity with hank_schrader
+gustavo_fring has high affinity with saul_goodman
+saul_goodman has low similarity with walter_blue
+saul_goodman has low affinity with walter_blue
+saul_goodman has high similarity with jesse_redman
+saul_goodman has high affinity with jesse_redman
+saul_goodman has high similarity with skyler_blue
+saul_goodman has high similarity with hank_schrader
+saul_goodman has high affinity with hank_schrader
+saul_goodman has high affinity with gustavo_fring
+walter_blue has some similar interests with jesse_redman
+walter_blue has few similar interests with skyler_blue
+walter_blue has few similar interests with hank_schrader
+walter_blue has few shared facets with hank_schrader
+walter_blue has few shared facets with gustavo_fring
+walter_blue has few similar interests with saul_goodman
+jesse_redman has some similar interests with walter_blue
+jesse_redman has few similar interests with skyler_blue
+jesse_redman has few shared facets with skyler_blue
+jesse_redman has few similar interests with hank_schrader
+jesse_redman has some shared facets with hank_schrader
+jesse_redman has some similar interests with gustavo_fring
+jesse_redman has some shared facets with gustavo_fring
+jesse_redman has few similar interests with saul_goodman
+jesse_redman has some shared facets with saul_goodman
+skyler_blue has few similar interests with walter_blue
+skyler_blue has few similar interests with jesse_redman
+skyler_blue has few shared facets with jesse_redman
+skyler_blue has some similar interests with hank_schrader
+skyler_blue has some shared facets with hank_schrader
+skyler_blue has few shared facets with gustavo_fring
+skyler_blue has some similar interests with saul_goodman
+hank_schrader has few similar interests with walter_blue
+hank_schrader has few shared facets with walter_blue
+hank_schrader has few similar interests with jesse_redman
+hank_schrader has some shared facets with jesse_redman
+hank_schrader has some similar interests with skyler_blue
+hank_schrader has some shared facets with skyler_blue
+hank_schrader has few similar interests with gustavo_fring
+hank_schrader has few shared facets with gustavo_fring
+hank_schrader has some shared facets with saul_goodman
+gustavo_fring has few shared facets with walter_blue
+gustavo_fring has some similar interests with jesse_redman
+gustavo_fring has some shared facets with jesse_redman
+gustavo_fring has few shared facets with skyler_blue
+gustavo_fring has few similar interests with hank_schrader
+gustavo_fring has few shared facets with hank_schrader
+gustavo_fring has few similar interests with saul_goodman
+gustavo_fring has some shared facets with saul_goodman
+saul_goodman has few similar interests with walter_blue
+saul_goodman has few similar interests with jesse_redman
+saul_goodman has some shared facets with jesse_redman
+saul_goodman has some similar interests with skyler_blue
+saul_goodman has some shared facets with hank_schrader
+saul_goodman has few similar interests with gustavo_fring
+saul_goodman has some shared facets with gustavo_fring

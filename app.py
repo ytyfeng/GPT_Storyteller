@@ -146,6 +146,23 @@ def createCASTInputs(background, uuid):
     #messages.append({"role": "assistant", "content": affinityByInterests})
     #print(messages)
 
+def getCASToutputs(uuid):
+    cast_input_dir = os.path.join(app.config['CAST_FOLDER'], "inputs/" + uuid)
+    if not os.path.exists(cast_input_dir):
+        print("CAST Input Files Not Found.")
+    from cast.clingo_file_formatter import run_clingo_formatter
+    output_dir = os.path.join("outputs/" + uuid + '/')
+    output_dir_cast = os.path.join(app.config['CAST_FOLDER'], "outputs/" + uuid + '/')
+    if os.path.exists(output_dir_cast):
+        os.system("rm -rf " + output_dir_cast)
+    os.mkdir(output_dir_cast)
+    run_clingo_formatter(cast_input_dir)
+    os.chdir("cast/generated")
+    os.system("clingo 1 * > ../" + output_dir + "cast_output.txt")
+    os.chdir("../../")
+    from oracle import parse_cast_output
+    parse_cast_output(output_dir_cast + "cast_output.txt", output_dir_cast + "parsed_output.txt")
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
