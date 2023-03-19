@@ -1,7 +1,12 @@
 from shutil import copyfile
+import os
 
 # folder_name = input("enter folder name: ")
-def run_clingo_formatter(folder_name):
+def run_clingo_formatter(folder_name, output_prefix):
+    if os.path.exists(output_prefix + "generated"):
+        os.system("rm -rf " + output_prefix + "generated")
+    os.mkdir(output_prefix + "generated")
+    
     facet_names = []
     interest_names = []
 
@@ -46,11 +51,11 @@ def run_clingo_formatter(folder_name):
         tempfiledata = filedata.replace('template', facet_name)
 
         # Write the file out again
-        with open("cast/generated/" + facet_name + '.lp', 'w') as file:
+        with open(output_prefix + "generated/" + facet_name + '.lp', 'w') as file:
             file.write(tempfiledata)
 
 
-    with open("cast/generated/similarity_generated.lp", 'w') as file:
+    with open(output_prefix + "generated/similarity_generated.lp", 'w') as file:
         max_facets = str(len(facet_names))
         max_interests = str(len(interest_names))
         max = str(len(facet_and_interests))
@@ -94,9 +99,9 @@ def run_clingo_formatter(folder_name):
         file.write("\tI+F!=T.\n");
 
 
-    copyfile("cast/persistent/similarity_persistant.lp", "cast/generated/similarity_persistant.lp")
-    copyfile("cast/persistent/affinity.lp", "cast/generated/affinity.lp")
-    copyfile(folder_name + "/instance.lp", "cast/generated/instance.lp")
-    copyfile(folder_name + "/affinity_rules.lp", "cast/generated/affinity_rules.lp")
+    copyfile("cast/persistent/similarity_persistant.lp", output_prefix + "generated/similarity_persistant.lp")
+    copyfile("cast/persistent/affinity.lp", output_prefix + "generated/affinity.lp")
+    copyfile(folder_name + "/instance.lp", output_prefix + "generated/instance.lp")
+    copyfile(folder_name + "/affinity_rules.lp", output_prefix + "generated/affinity_rules.lp")
 
 

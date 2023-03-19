@@ -3,3 +3,4 @@
 .idea/*
 .R*
 generated/*
+outputs/*/generated

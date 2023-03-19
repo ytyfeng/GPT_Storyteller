@@ -156,10 +156,10 @@ def getCASToutputs(uuid):
     if os.path.exists(output_dir_cast):
         os.system("rm -rf " + output_dir_cast)
     os.mkdir(output_dir_cast)
-    run_clingo_formatter(cast_input_dir)
-    os.chdir("cast/generated")
-    os.system("clingo 1 * > ../" + output_dir + "cast_output.txt")
-    os.chdir("../../")
+    run_clingo_formatter(cast_input_dir, output_dir_cast)
+    os.chdir(output_dir_cast + "generated")
+    os.system("clingo 1 * > ../" + "cast_output.txt")
+    os.chdir("../../../../")
     from oracle import parse_cast_output
     parse_cast_output(output_dir_cast + "cast_output.txt", output_dir_cast + "parsed_output.txt")
 
