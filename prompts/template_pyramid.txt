@@ -1,0 +1,9 @@
+<place>[location name]</place> <element>Exposition</element> <beat>[beat]</beat>
+<place>[location name]</place> <element>Inciting Incident</element> <beat>[beat]</beat>
+<place>[location name]</place> <element>Conflict</element> <beat>[beat]</beat>
+<place>[location name]</place> <element>Rising Action</element> <beat>[beat]</beat>
+<place>[location name]</place> <element>Dilemma</element> <beat>[beat]</beat>
+<place>[location name]</place> <element>Climax</element> <beat>[beat]</beat> 
+<place>[location name]</place> <element>Falling Action</element> <beat>[beat]</beat>   
+<place>[location name]</place> <element>Resolution</element> <beat>[beat]</beat>   
+<place>[location name]</place> <element>Denouement</element> <beat>[beat]</beat> 

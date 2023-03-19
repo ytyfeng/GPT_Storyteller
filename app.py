@@ -151,7 +151,6 @@ def getCASToutputs(uuid):
     if not os.path.exists(cast_input_dir):
         print("CAST Input Files Not Found.")
     from cast.clingo_file_formatter import run_clingo_formatter
-    output_dir = os.path.join("outputs/" + uuid + '/')
     output_dir_cast = os.path.join(app.config['CAST_FOLDER'], "outputs/" + uuid + '/')
     if os.path.exists(output_dir_cast):
         os.system("rm -rf " + output_dir_cast)
