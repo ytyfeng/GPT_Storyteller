@@ -9,7 +9,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class Storyteller:
 
-    @backoff.on_exception(backoff.expo, openai.error.RateLimitError)
+    @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.APIConnectionError))
     def get_response_with_retry(self, prompt, messages=None, max_tokens=600, model="gpt-4"):
         if messages is not None:
             response = openai.ChatCompletion.create(

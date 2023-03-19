@@ -135,9 +135,8 @@ def saveCASTEdits(uuid):
     background = messages[0].text
     story = Storyteller().generate_story_cast(background, uuid)
     msgAI = Message("AI", story, datetime.datetime.now())
-    messages = []
     messages.append(msgAI)
-
+    collection.document(uuid).update({"messages" : toDict(messages)})
     return render_template("index.html", messages=messages)
 
 @app.route('/removeCookie', methods=['GET'])
