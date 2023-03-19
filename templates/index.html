@@ -24,7 +24,7 @@
     <div class="jumbotron">
         {% block body %}{% endblock %}
     </div>
-    <div style="margin-top:30px;">
+    <div style="margin-top: 50px;display: flex;flex-wrap: wrap;justify-content: center;align-items: center;">
       <button type="respin" onclick="Storyteller.removeCookie();">Re-spin</button>
     </div>
     
@@ -34,9 +34,6 @@
   </div>
   <script>
     function showLoading(seconds) {
-      if (!document.getElementsByName("user_story")[0].value) {
-        return;
-      }
       document.getElementById("overlay").style.display = "block";
       setTimeout(
         function() {

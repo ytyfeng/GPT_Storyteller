@@ -91,15 +91,18 @@ def saveMessages(uuid):
 def readCASTInputFiles(uuid):
     castDir = os.path.join(app.config['CAST_FOLDER'], "inputs/" + uuid)
     if os.path.exists(castDir):
-        with open(castDir + "/interests.txt", "r") as f:
-            interests = f.read()
-        with open(castDir + "/facets.txt", "r") as f:
-            facets = f.read()
-        with open(castDir + "/instance.lp", "r") as f:
-            instance = f.read()
-        with open(castDir + "/affinity_rules.lp", "r") as f:
-            affinity = f.read()
-        return interests, facets, instance, affinity
+        try:
+            with open(castDir + "/interests.txt", "r") as f:
+                interests = f.read()
+            with open(castDir + "/facets.txt", "r") as f:
+                facets = f.read()
+            with open(castDir + "/instance.lp", "r") as f:
+                instance = f.read()
+            with open(castDir + "/affinity_rules.lp", "r") as f:
+                affinity = f.read()
+            return interests, facets, instance, affinity
+        except:
+            return None, None, None, None
     else:
         return None, None, None, None
 
@@ -170,29 +173,29 @@ def createCASTInputs(background, uuid):
     userPrompt1 += background
     messages.append({"role": "system", "content": systemPrompt})
     messages.append({"role": "user", "content": userPrompt1})
-    interests = Storyteller().get_response(None, messages)
+    interests = Storyteller().get_response_with_retry(None, messages)
     with open(outputDir + "/interests.txt", "w") as f:
         f.write(interests)
     messages.append({"role": "assistant", "content": interests})
     userPrompt2 = "Do the same thing for facets.txt."
     messages.append({"role": "user", "content": userPrompt2})
-    facets = Storyteller().get_response(None, messages)
+    facets = Storyteller().get_response_with_retry(None, messages)
     with open(outputDir + "/facets.txt", "w") as f:
         f.write(facets)
     messages.append({"role": "assistant", "content": facets})
     userPrompt3 = "Generate the instance.lp file by writing character() and level() rules for each interest and facet for each character. "
     messages.append({"role": "user", "content": userPrompt3})
-    instance = Storyteller().get_response(None, messages, 1600)
+    instance = Storyteller().get_response_with_retry(None, messages, 1600)
     with open(outputDir + "/instance.lp", "w") as f:
         f.write(instance)
     messages.append({"role": "assistant", "content": instance})
     userPrompt4 = "Generate affinity rules for each interest with high-high, low-low, low-high, and high-low levels."
     messages.append({"role": "user", "content": userPrompt4})
-    affinityByInterests = Storyteller().get_response(None, messages, 1600)
+    affinityByInterests = Storyteller().get_response_with_retry(None, messages, 1600)
     messages.pop()
     userPrompt5 = "Generate affinity rules for each facet with high-high, low-low, low-high, and high-low levels."
     messages.append({"role": "user", "content": userPrompt5})
-    affinityByFacets = Storyteller().get_response(None, messages, 1600)
+    affinityByFacets = Storyteller().get_response_with_retry(None, messages, 1600)
     with open(outputDir + "/affinity_rules.lp", "w") as f:
         f.write(affinityByInterests + "\n" + affinityByFacets)
     return interests, facets, instance, affinityByInterests + "\n" + affinityByFacets

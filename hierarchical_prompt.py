@@ -1,6 +1,7 @@
 import openai
 import os
 import re
+import backoff 
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -8,7 +9,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class Storyteller:
 
-    def get_response(self, prompt, messages=None, max_tokens=600, model="gpt-4"):
+    @backoff.on_exception(backoff.expo, openai.error.RateLimitError)
+    def get_response_with_retry(self, prompt, messages=None, max_tokens=600, model="gpt-4"):
         if messages is not None:
             response = openai.ChatCompletion.create(
                 model=model,
@@ -33,12 +35,11 @@ class Storyteller:
                 )
         return response.choices[0].message.content
 
-
     def get_characters_desc(self, background):
         with open("prompts/char_prompt.txt", "r") as f:
             prompt = f.readline()
         prompt += background
-        char_desc = self.get_response(prompt)
+        char_desc = self.get_response_with_retry(prompt)
         characters = re.findall("<character>(.*?)</character>", char_desc, re.DOTALL)
         descriptions = re.findall("<description>(.*?)</description>", char_desc, re.DOTALL)
         char_desc = {}
@@ -52,7 +53,7 @@ class Storyteller:
         with open("prompts/outline_prompt.txt", "r") as f:
             prompt = f.readline()
         prompt = prompt + background + ' ' + char_desc_text + ' <scenes> '
-        outline_text = self.get_response(prompt, max_tokens=800)
+        outline_text = self.get_response_with_retry(prompt, max_tokens=800)
         places = re.findall("<place>(.*?)</place>", outline_text, re.DOTALL)
         plot_ele = re.findall("<element>(.*?)</element>", outline_text, re.DOTALL)
         beats = re.findall("<beat>(.*?)</beat>", outline_text, re.DOTALL)
@@ -72,7 +73,7 @@ class Storyteller:
         prompt = prompt + background + ' '
         for loc_name in loc_names:
             prompt_loc = prompt + "<place>" + loc_name + "</place> " + "Description: "
-            desc = self.get_response(prompt_loc, model="gpt-3.5-turbo")
+            desc = self.get_response_with_retry(prompt_loc, model="gpt-3.5-turbo")
             loc_desc.update({loc_name: desc})
 
         with open("example_stories/loc_desc.txt", "w") as f:
@@ -96,7 +97,7 @@ class Storyteller:
             prompt_i += "Beat: " + outline[2] + "\n"
             prompt_i += "Elaborated Story: "
             previous_beats += outline[2] + "\n"
-            story = self.get_response(prompt_i, model="gpt-3.5-turbo")
+            story = self.get_response_with_retry(prompt_i, model="gpt-3.5-turbo")
             stories += story + "\n"
         with open("example_stories/story.txt", "w") as f:
             f.write(stories)
@@ -127,7 +128,7 @@ class Storyteller:
             with open(os.path.join("cast/", "outputs/" + uuid + '/parsed_output.txt'), "r") as f:
                 cast_relations = f.read()
             prompt += "Character Relations: " + cast_relations
-        char_desc = self.get_response(prompt, max_tokens=800)
+        char_desc = self.get_response_with_retry(prompt, max_tokens=800)
         characters = re.findall("<character>(.*?)</character>", char_desc, re.DOTALL)
         descriptions = re.findall("<description>(.*?)</description>", char_desc, re.DOTALL)
         char_desc = {}
@@ -149,7 +150,7 @@ class Storyteller:
         with open("prompts/template_pyramid.txt", "r") as f:
             template = f.read()
         prompt += template
-        outline_text = self.get_response(prompt, max_tokens=800)
+        outline_text = self.get_response_with_retry(prompt, max_tokens=800)
         places = re.findall("<place>(.*?)</place>", outline_text, re.DOTALL)
         plot_ele = re.findall("<element>(.*?)</element>", outline_text, re.DOTALL)
         beats = re.findall("<beat>(.*?)</beat>", outline_text, re.DOTALL)
