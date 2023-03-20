@@ -133,11 +133,9 @@ def saveCASTEdits(uuid):
     doc = collection.document(uuid).get()
     messages = toMessages(doc.to_dict().get("messages"))
     background = messages[0].text
-    story = Storyteller().generate_story_cast(background, uuid)
-    msgAI = Message("AI", story, datetime.datetime.now())
-    messages.append(msgAI)
-    collection.document(uuid).update({"messages" : toDict(messages)})
-    return render_template("index.html", messages=messages)
+    story_messages = Storyteller().generate_story_cast(background, uuid)
+    collection.document(uuid).update({"messages" : toDict(story_messages)})
+    return render_template("index.html", messages=story_messages)
 
 @app.route('/removeCookie', methods=['GET'])
 def removeCookie():

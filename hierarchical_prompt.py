@@ -1,13 +1,24 @@
 import openai
 import os
 import re
-import backoff 
+import backoff
+import datetime
+from tqdm import tqdm
 
 from dotenv import load_dotenv
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+class Message:
+    def  __init__(self, sender, text, timestamp):
+        self.sender = sender
+        self.text = text
+        self.timestamp = timestamp
+
 class Storyteller:
+
+    def  __init__(self):
+        self.messages = []
 
     @backoff.on_exception(backoff.expo, (openai.error.RateLimitError, openai.error.APIConnectionError))
     def get_response_with_retry(self, prompt, messages=None, max_tokens=600, model="gpt-4"):
@@ -68,10 +79,10 @@ class Storyteller:
 
     def get_location_desc(self, loc_names, background):
         loc_desc = {}
-        with open("prompts/place_prompt.txt", "r") as f:
+        with open("prompts/place_prompt_2.txt", "r") as f:
             prompt = f.readline()
         prompt = prompt + background + ' '
-        for loc_name in loc_names:
+        for loc_name in tqdm(loc_names):
             prompt_loc = prompt + "<place>" + loc_name + "</place> " + "Description: "
             desc = self.get_response_with_retry(prompt_loc, model="gpt-3.5-turbo")
             loc_desc.update({loc_name: desc})
@@ -86,22 +97,28 @@ class Storyteller:
         previous_beats = ""
         stories = ""
         char_desc_text = " ".join(all_char_desc)
-        prompt = "Based on the Background, Characters Descriptions, Place Description, Plot Element, Previous Beats, elaborate the Beat into one story paragraph. \n"
+        prompt = "Imagine yourself as an intelligent storyteller. Based on the Background, Characters Descriptions, Place Description, Plot Element, and Story so far, elaborate the Next Beat into one paragraph. \n"
         prompt += "Background: " + background + "\n"
+        self.messages.append(Message("Story Background", background, datetime.datetime.now()))
         prompt += "Characters Description: " + char_desc_text + "\n"
-        for outline in outlines:
+        self.messages.append(Message("Character Descriptions", char_desc_text, datetime.datetime.now()))
+        for outline in tqdm(outlines):
             prompt_i = prompt
             prompt_i += "Place Description: " + loc_desc[outline[0]] + "\n"
             prompt_i += "Plot Element: " + outline[1] + "\n"
-            prompt_i += "Previous Beats: " + previous_beats + "\n"
-            prompt_i += "Beat: " + outline[2] + "\n"
-            prompt_i += "Elaborated Story: "
+            # prompt_i += "Previous Beats: " + previous_beats + "\n"
+            prompt_i += "Story so far: " + stories + "\n"
+            prompt_i += "Next Beat: " + outline[2] + "\n"
+            prompt_i += "Elaborated Paragraph: "
             previous_beats += outline[2] + "\n"
             story = self.get_response_with_retry(prompt_i, model="gpt-3.5-turbo")
             stories += story + "\n"
+            self.messages.append(Message("Place: " + outline[0], loc_desc[outline[0]], datetime.datetime.now()))
+            self.messages.append(Message("Beat - " + outline[1], outline[2], datetime.datetime.now()))
+            self.messages.append(Message("Story - " + outline[1], story, datetime.datetime.now()))
         with open("example_stories/story.txt", "w") as f:
             f.write(stories)
-        return stories
+        return self.messages
 
     def generate_story(self, background):
         # get characters descriptions from bg
@@ -132,11 +149,13 @@ class Storyteller:
         characters = re.findall("<character>(.*?)</character>", char_desc, re.DOTALL)
         descriptions = re.findall("<description>(.*?)</description>", char_desc, re.DOTALL)
         char_desc = {}
+        all_char_desc = []
         for i in range(len(characters)):
             char_desc.update({characters[i]:descriptions[i]})
+            all_char_desc.append(characters[i] + ": " + descriptions[i])
         with open("example_stories/char_desc.txt", "w") as f:
             f.write(str(char_desc))
-        return char_desc, descriptions
+        return char_desc, all_char_desc
 
     def get_outline_zero_shot(self, background, all_char_desc, uuid, use_cast=True):
         char_desc_text = " ".join(all_char_desc)
@@ -165,13 +184,13 @@ class Storyteller:
 
     def generate_story_cast(self, background, uuid):
         print("Modifying character descriptions...")
-        char_desc_dict, all_desc = self.get_char_desc_zero_shot(background, uuid)
+        _, all_desc = self.get_char_desc_zero_shot(background, uuid)
         print("Generating story outlines...")
         outlines, loc_names = self.get_outline_zero_shot(background, all_desc, uuid)
         print("Generating location descriptions...")
         loc_desc = self.get_location_desc(loc_names, background)
         print("Writing the whole story...")
-        stories = self.get_stories(outlines, background, char_desc_dict, loc_desc)
+        stories = self.get_stories(outlines, background, all_desc, loc_desc)
         return stories
 
     
