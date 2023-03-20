@@ -84,7 +84,7 @@ class Storyteller:
         prompt = prompt + background + ' '
         for loc_name in tqdm(loc_names):
             prompt_loc = prompt + "<place>" + loc_name + "</place> " + "Description: "
-            desc = self.get_response_with_retry(prompt_loc, model="gpt-3.5-turbo")
+            desc = self.get_response_with_retry(prompt_loc) #, model="gpt-3.5-turbo")
             loc_desc.update({loc_name: desc})
 
         with open("example_stories/loc_desc.txt", "w") as f:
@@ -111,7 +111,7 @@ class Storyteller:
             prompt_i += "Next Beat: " + outline[2] + "\n"
             prompt_i += "Elaborated Paragraph: "
             previous_beats += outline[2] + "\n"
-            story = self.get_response_with_retry(prompt_i, model="gpt-3.5-turbo")
+            story = self.get_response_with_retry(prompt_i) #, model="gpt-3.5-turbo")
             stories += story + "\n"
             self.messages.append(Message("Place: " + outline[0], loc_desc[outline[0]], datetime.datetime.now()))
             self.messages.append(Message("Beat - " + outline[1], outline[2], datetime.datetime.now()))
@@ -138,8 +138,13 @@ class Storyteller:
     
 
     # zero-short hierarchical prompt
-    def get_char_desc_zero_shot(self, background, uuid, use_cast=True):
-        prompt = "Based on the Background, generate a list of characters with descriptions about their roles in the story. Consider what they might do and the goals they might have based on the Character relations. Each character has its name wrapped in <character>[name]</character>, and its description in <description>[character description]</description>: \nBackground: "
+    def get_char_desc_zero_shot(self, background, uuid, use_cast=True, zero_shot=True):
+        if zero_shot is False:
+            with open("prompts/char_prompt.txt", "r") as f:
+                prompt = f.readline() + "\n"
+        else:
+            prompt = ""
+        prompt += "Based on the following Background, generate a list of characters with descriptions about their roles in the story. Consider what they might do and the goals they might have based on the Character relations. Each character has its name wrapped in <character>[name]</character>, and its description in <description>[character description]</description>: \nBackground: "
         prompt += background
         if use_cast:
             with open(os.path.join("cast/", "outputs/" + uuid + '/parsed_output.txt'), "r") as f:
@@ -157,9 +162,14 @@ class Storyteller:
             f.write(str(char_desc))
         return char_desc, all_char_desc
 
-    def get_outline_zero_shot(self, background, all_char_desc, uuid, use_cast=True):
+    def get_outline_zero_shot(self, background, all_char_desc, uuid, use_cast=True, zero_shot=True):
         char_desc_text = " ".join(all_char_desc)
-        prompt = "Based on Background, Character Descriptions, and Character Relations. Fill the [location name] with location names and [beat] with a 2-4 sentences story beats in each plot element. \n"
+        if zero_shot is False:
+            with open("prompts/outline_prompt.txt", "r") as f:
+                prompt = f.readline()
+        else:
+            prompt = ""
+        prompt += "Based on Background, Character Descriptions, and Character Relations. Fill the [location name] with location names and [beat] with a 2-4 sentences story beats in each plot element. \n"
         prompt += "Background: " + background + "\n"
         prompt += "Character Descriptions: " + char_desc_text + "\n"
         if use_cast:
@@ -193,12 +203,11 @@ class Storyteller:
         stories = self.get_stories(outlines, background, all_desc, loc_desc)
         return stories
 
-    
-
 if __name__ == "__main__":
     background = "Walter Blue, an underpaid, overqualified, and dispirited high-school chemistry teacher who is struggling with a recent diagnosis of stage-three lung cancer. Blue turns to a life of crime and partners with a former student, Jesse Redman, to produce and distribute methamphetamine to secure his family's financial future before he dies, while navigating the dangers of the criminal underworld."
     # story = Storyteller().generate_story("Walter Blue, an underpaid, overqualified, and dispirited high-school chemistry teacher who is struggling with a recent diagnosis of stage-three lung cancer. Blue turns to a life of crime and partners with a former student, Jesse Redman, to produce and distribute methamphetamine to secure his family's financial future before he dies, while navigating the dangers of the criminal underworld.")
     # print(story)
     storyteller = Storyteller()
-    char_desc, all_char_desc = storyteller.get_char_desc_zero_shot(background, "7ddae51d-171c-cb15-95f0-5d33b09f597a")
-    storyteller.get_outline_zero_shot(background, char_desc, "7ddae51d-171c-cb15-95f0-5d33b09f597a")
+    #char_desc, all_char_desc = storyteller.get_char_desc_zero_shot(background, "7ddae51d-171c-cb15-95f0-5d33b09f597a")
+    #storyteller.get_outline_zero_shot(background, char_desc, "7ddae51d-171c-cb15-95f0-5d33b09f597a")
+    story = storyteller.generate_story_cast(background, "7ddae51d-171c-cb15-95f0-5d33b09f597a")
