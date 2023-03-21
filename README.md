@@ -1,6 +1,11 @@
 # GPT Storyteller
+### Ty Feng, Wenchang Liu, Frank Gomez
 
 This is the GPT Storyteller web app. It uses the [Flask](https://flask.palletsprojects.com/en/2.0.x/) web framework. 
+
+## Live Demo
+
+Instead of setting up the project yourself, you can also find our live demo at [http://gpt-story.com](http://gpt-story.com).
 
 ## Setup
 
@@ -24,7 +29,11 @@ This is the GPT Storyteller web app. It uses the [Flask](https://flask.palletspr
    ```bash
    $ pip install -r requirements.txt
    ```
+   Install clingo for CAST:
 
+   ```bash
+   $ sudo apt install gringo
+   ````
    To set up Firebase for the FireStore DB used in the project:
 
    ```bash
@@ -39,12 +48,13 @@ This is the GPT Storyteller web app. It uses the [Flask](https://flask.palletspr
    $ cp .env.example .env
    ```
 
-7. Add your [API key](https://beta.openai.com/account/api-keys) to the newly created `.env` file.
+7. Add your [OpenAI API key](https://beta.openai.com/account/api-keys) to the newly created `.env` file.
+   If your API key does not have access to GPT-4, change line 24 in [hierarchical_prompt.py](hierarchical_prompt.py) to use "gpt-3.5-turbo" instead.
 
 8. Run the app:
 
    ```bash
-   $ flask run
+   $ python app.py
    ```
 
-You should now be able to access the app at [http://localhost:5000](http://localhost:5000)!
+You should now be able to access the app at [http://localhost](http://localhost)!

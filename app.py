@@ -52,7 +52,7 @@ def getMessages(uuid):
     messages = []
     if doc.exists:
         messages = toMessages(doc.to_dict().get("messages"))
-        resp = make_response(render_template("index.html", messages=messages, cast_href="/cast/" + uuid))
+        resp = make_response(render_template("index.html", messages=messages))
     else:
         resp = make_response(render_template("background_input.html", messages=messages))
     resp.set_cookie('storyteller_id', cookieUUID, max_age=2592000)
@@ -108,9 +108,15 @@ def readCASTInputFiles(uuid):
 
 @app.route('/cast/<uuid>', methods=['GET'])
 def renderCASTEditor(uuid):
-    interests, facets, instance, affinity = readCASTInputFiles(uuid)
-    return render_template("cast.html", interests=interests, facets=facets, instance=instance, affinity=affinity)
-
+    cookieUUID = request.cookies.get('storyteller_id')
+    if cookieUUID is None or cookieUUID == '':
+        cookieUUID = uuid
+    interests, facets, instance, affinity = readCASTInputFiles(cookieUUID)
+    resp = make_response(render_template("cast.html", interests=interests, facets=facets, instance=instance, affinity=affinity))
+    resp.set_cookie('storyteller_id', cookieUUID, max_age=2592000)
+    return resp
+    
+    
 @app.route('/cast/<uuid>', methods=['POST'])
 def saveCASTEdits(uuid):
     castDir = os.path.join(app.config['CAST_FOLDER'], "inputs/" + uuid)
